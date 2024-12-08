@@ -34,11 +34,16 @@ def main():
     while True:  # Continuous loop to restart the game automatically
         game = Game(mode, agent=ai)
 
-        if mode == "student":
-            game.run()
-            
+        if mode == "student" or mode in ["greedy", "genetic", "mcts", "random"]:
+            try:
+                print("Starting the game with visualization...")
+                pieces_dropped, rows_cleared = game.run()  # Runs with visualization
+                print(f"Game Over! Pieces Dropped: {pieces_dropped}, Rows Cleared: {rows_cleared}")
+            except Exception as e:
+                print(f"An error occurred during the game: {e}")
         else:
-            game.run()  # Runs with visualization
+            print(f"Unknown mode: {mode}")
+            sys.exit(1)
 
         # Automatically restart the game after game over
         print("Restarting the game...\n")
