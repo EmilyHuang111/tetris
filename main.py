@@ -1,5 +1,3 @@
-# main.py
-
 import sys
 from game import Game
 from custom_model import CUSTOM_AI_MODEL
@@ -33,12 +31,17 @@ def main():
             print(f"Unknown mode: {mode}")
             sys.exit(1)
 
-    game = Game(mode, agent=ai)
-    if mode == "student":
-        game.run()
-          # Runs with visualization
-    else:
-        game.run()  # Runs without visualization
+    while True:  # Continuous loop to restart the game automatically
+        game = Game(mode, agent=ai)
+
+        if mode == "student":
+            game.run()
+            
+        else:
+            game.run()  # Runs with visualization
+
+        # Automatically restart the game after game over
+        print("Restarting the game...\n")
 
 if __name__ == "__main__":
     main()
