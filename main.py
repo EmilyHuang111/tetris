@@ -37,7 +37,7 @@ def main():
         if mode == "student" or mode in ["greedy", "genetic", "mcts", "random"]:
             try:
                 print("Starting the game with visualization...")
-                pieces_dropped, rows_cleared = game.run()  # Runs with visualization
+                game.run()  # Runs with visualization
                 
             except Exception as e:
                 print(f"An error occurred during the game: {e}")
