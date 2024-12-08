@@ -31,22 +31,17 @@ def main():
             print(f"Unknown mode: {mode}")
             sys.exit(1)
 
-    while True:  # Continuous loop to restart the game automatically
+    while True:
+        print("Starting a new game...")
         game = Game(mode, agent=ai)
-
-        if mode == "student" or mode in ["greedy", "genetic", "mcts", "random"]:
-            try:
-                print("Starting the game with visualization...")
-                game.run()  # Runs with visualization
-                
-            except Exception as e:
-                print(f"An error occurred during the game: {e}")
+        
+        if mode == "student":
+            game.run()  # Runs with visualization
         else:
-            print(f"Unknown mode: {mode}")
-            sys.exit(1)
+            game.run()  # Runs without visualization
 
-        # Automatically restart the game after game over
-        print("Restarting the game...\n")
+        print("Game over! Restarting...")
 
 if __name__ == "__main__":
     main()
+
