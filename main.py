@@ -38,7 +38,7 @@ def main():
             try:
                 print("Starting the game with visualization...")
                 pieces_dropped, rows_cleared = game.run()  # Runs with visualization
-                print(f"Game Over! Pieces Dropped: {pieces_dropped}, Rows Cleared: {rows_cleared}")
+                
             except Exception as e:
                 print(f"An error occurred during the game: {e}")
         else:
