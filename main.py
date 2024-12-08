@@ -11,7 +11,7 @@ def main():
     mode = sys.argv[1]
 
     if mode == "student":
-        ai = CUSTOM_AI_MODEL(genotype_file='data/best_genotype.npy')
+        ai = CUSTOM_AI_MODEL(genotype_file='data/best_genotype_epoch_5.npy')
     else:
         # Initialize other AIs as per existing implementation
         from greedy import Greedy_AI
