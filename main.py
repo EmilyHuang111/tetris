@@ -35,7 +35,7 @@ def main():
 
     game = Game(mode, agent=ai)
     if mode == "student":
-        game.run_no_visual()
+        game.run()
           # Runs with visualization
     else:
         game.run()  # Runs without visualization
