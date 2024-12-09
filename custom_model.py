@@ -7,7 +7,7 @@ from piece import Piece
 from board import Board
 
 class CUSTOM_AI_MODEL:
-    def __init__(self, genotype_file='data/best_genotype.npy', aggregate='lin'):
+    def __init__(self, genotype_file='data/best_genotype_epoch_15.npy', aggregate='lin'):
         """
         Initializes the AI model by loading the trained genotype.
         
