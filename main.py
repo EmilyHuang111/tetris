@@ -1,6 +1,7 @@
-import sys
 from game import Game
-from custom_model import CUSTOM_AI_MODEL
+import sys
+import os
+
 
 def main():
     if len(sys.argv) < 2:
@@ -11,37 +12,17 @@ def main():
     mode = sys.argv[1]
 
     if mode == "student":
-        ai = CUSTOM_AI_MODEL(genotype_file='data/best_genotype_epoch_35.npy')
+        # Use CUSTOM_AI_MODEL for student mode
+        from custom_model import CUSTOM_AI_MODEL
+        ai = CUSTOM_AI_MODEL(model_path="trained_models/tetris_2000")
+        game = Game(mode="student", agent=ai)
     else:
-        # Initialize other AIs as per existing implementation
-        from greedy import Greedy_AI
-        from genetic import Genetic_AI
-        from mcts import MCTS_AI
-        from randomChoice import RandomChoice_NOT_AI
+        # For other modes
+        game = Game(mode=mode)
 
-        if mode == "greedy":
-            ai = Greedy_AI()
-        elif mode == "genetic":
-            ai = Genetic_AI()
-        elif mode == "mcts":
-            ai = MCTS_AI()
-        elif mode == "random":
-            ai = RandomChoice_NOT_AI()
-        else:
-            print(f"Unknown mode: {mode}")
-            sys.exit(1)
+    # Run the game
+    game.run_no_visual()
 
-    while True:
-        print("Starting a new game...")
-        game = Game(mode, agent=ai)
-        
-        if mode == "student":
-            game.run()  # Runs with visualization
-        else:
-            game.run()  # Runs without visualization
-
-        print("Game over! Restarting...")
 
 if __name__ == "__main__":
     main()
-
