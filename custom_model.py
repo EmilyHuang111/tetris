@@ -1,95 +1,45 @@
-# custom_model.py
+import torch
+from q_learning import QLearning  # Assuming QLearning is your model class
 
-import numpy as np
-from genetic_helpers import bool_to_np
-from copy import deepcopy
-from piece import Piece
-from board import Board
 
 class CUSTOM_AI_MODEL:
-    def __init__(self, genotype_file='data/best_genotype.npy', aggregate='lin'):
+    def __init__(self, model_path="trained_models/tetris_2000"):
+        # Load the pre-trained model
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = torch.load(model_path, map_location=self.device)
+        self.model.eval()
+
+    def get_best_move(self, board, current_piece):
         """
-        Initializes the AI model by loading the trained genotype.
-        
-        :param genotype_file: Path to the saved genotype file.
-        :param aggregate: Type of aggregation function used ('lin', 'exp', etc.).
+        Determine the best move for the given piece and board state.
+
+        Args:
+            board (Board): The current board state.
+            current_piece (Piece): The current piece.
+
+        Returns:
+            tuple: The best x-coordinate and the rotated piece.
         """
-        self.genotype = np.load(genotype_file)
-        self.aggregate = aggregate
+        best_score = float("-inf")
+        best_move = None
 
-    def valuate(self, board, aggregate='lin'):
-        """
-        Computes the evaluation score based on the board state and genotype.
-        """
-        peaks = get_peaks(board)
-        highest_peak = np.max(peaks)
-        holes = get_holes(peaks, board)
-        wells = get_wells(peaks)
+        # Get all possible next states
+        next_states = board.get_next_states()
 
-        rating_funcs = {
-            'agg_height': np.sum(peaks),
-            'n_holes': np.sum(holes),
-            'bumpiness': get_bumpiness(peaks),
-            'num_pits': np.count_nonzero(np.count_nonzero(board, axis=0) == 0),
-            'max_wells': np.max(wells),
-            'n_cols_with_holes': np.count_nonzero(np.array(holes) > 0),
-            'row_transitions': get_row_transition(board, highest_peak),
-            'col_transitions': get_col_transition(board, peaks),
-            'cleared': np.count_nonzero(np.mean(board, axis=1))
-        }
+        for (x, rotation), board_state in next_states.items():
+            # Convert board state to a tensor and send it to the model
+            board_state = board_state.to(self.device)
 
-        # Only linear aggregation is implemented
-        if aggregate == 'lin':
-            ratings = np.array([rating_funcs['agg_height'],
-                                rating_funcs['n_holes'],
-                                rating_funcs['bumpiness'],
-                                rating_funcs['num_pits'],
-                                rating_funcs['max_wells'],
-                                rating_funcs['n_cols_with_holes'],
-                                rating_funcs['row_transitions'],
-                                rating_funcs['col_transitions'],
-                                -rating_funcs['cleared']])  # Negative because clearing rows is good
-            aggregate_rating = np.dot(ratings, self.genotype)
-        else:
-            # Implement other aggregation functions if needed
-            aggregate_rating = 0
+            with torch.no_grad():
+                score = self.model(board_state).item()
 
-        return aggregate_rating
+            if score > best_score:
+                best_score = score
+                best_move = (x, rotation)
 
-    def get_best_move(self, board, piece, depth=1):
-        """
-        Determines the best move based on the current board and piece.
-        
-        :param board: Current state of the board.
-        :param piece: Current piece to place.
-        :param depth: Search depth (not used in this simple implementation).
-        :return: Tuple (best_x, best_piece).
-        """
-        best_x = -1
-        best_piece = None
-        max_value = -np.inf
+        # Extract the best x and rotation, and return the corresponding piece
+        x, rotation = best_move
+        for _ in range(rotation):
+            current_piece = current_piece.get_next_rotation()
 
-        for rotation in range(4):
-            rotated_piece = piece.get_next_rotation()
-            for x in range(board.width):
-                try:
-                    y = board.drop_height(rotated_piece, x)
-                except Exception:
-                    continue
-
-                board_copy = deepcopy(board.board)
-                for pos in rotated_piece.body:
-                    board_copy[y + pos[1]][x + pos[0]] = True
-
-                np_board = bool_to_np(board_copy)
-                value = self.valuate(np_board, aggregate=self.aggregate)
-
-                if value > max_value:
-                    max_value = value
-                    best_x = x
-                    best_piece = rotated_piece
-
-        return best_x, best_piece
-
-# Ensure you have all helper functions imported or defined within this file
-from genetic_helpers import get_peaks, get_holes, get_wells, get_bumpiness, get_row_transition, get_col_transition
+        return x, current_piece
